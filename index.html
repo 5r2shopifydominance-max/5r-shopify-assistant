@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>5R Shopify Launch Assistant</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--green:#1D9E75;--green-d:#0F6E56;--green-l:#E1F5EE;--green-m:#9FE1CB;--text:#1a1a1a;--muted:#6b7280;--border:rgba(0,0,0,0.1);--bg:#fff;--bg2:#f9fafb;--bg3:#f3f4f6;--r:8px;--rl:12px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);background:var(--bg3);min-height:100vh}
+.shell{max-width:1100px;margin:0 auto;background:var(--bg);min-height:100vh;box-shadow:0 0 0 0.5px var(--border)}
+.header{display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border)}
+.logo{width:38px;height:38px;border-radius:9px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
+.app-name{font-size:15px;font-weight:600}
+.app-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.nav{display:flex;border-bottom:0.5px solid var(--border);padding:0 1.5rem;gap:2px;overflow-x:auto;background:#fff}
+.ntab{padding:10px 14px;font-size:13px;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-0.5px;white-space:nowrap;transition:color .15s}
+.ntab:hover{color:var(--text)}
+.ntab.on{color:var(--green);border-bottom-color:var(--green);font-weight:500}
+.tab{display:none;padding:1.25rem 1.5rem}
+.tab.on{display:block}
+.slbl{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin:12px 0 8px}
+.srow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.sc{background:var(--bg2);border-radius:var(--r);padding:10px 12px}
+.sl{font-size:11px;color:var(--muted);margin-bottom:2px}
+.sv{font-size:22px;font-weight:600}
+.pb{background:var(--bg3);border-radius:99px;height:5px;margin-bottom:14px}
+.pf{height:5px;border-radius:99px;background:var(--green);transition:width .4s}
+.irow{display:flex;gap:8px;margin-top:10px}
+.inp{flex:1;padding:9px 12px;font-size:13px;border:0.5px solid var(--border);border-radius:var(--r);background:#fff;color:var(--text);outline:none}
+.inp:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(29,158,117,.1)}
+.bg{padding:9px 16px;font-size:13px;border-radius:var(--r);background:var(--green);color:#fff;border:none;cursor:pointer;font-weight:500;white-space:nowrap}
+.bg:hover{background:var(--green-d)}
+.bg:disabled{opacity:.5;cursor:not-allowed}
+.bo{padding:9px 13px;font-size:12px;border-radius:var(--r);cursor:pointer;border:0.5px solid var(--border);background:#fff;color:var(--text)}
+.bo:hover{border-color:var(--green);color:var(--green)}
+.aout{background:var(--bg2);border-radius:var(--r);padding:12px 14px;font-size:13px;line-height:1.6;margin-top:10px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted);display:inline-block;animation:bl 1.2s infinite;margin-right:2px}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.cbadge{font-size:11px;padding:3px 9px;border-radius:6px;background:#dbeafe;color:#1e40af;display:inline-block;margin-bottom:10px}
+
+/* SETUP */
+.ssegs{display:flex;gap:3px;margin-bottom:12px}
+.seg{flex:1;height:4px;border-radius:99px;background:var(--bg3)}
+.seg.done{background:var(--green)}.seg.cur{background:var(--green-m)}
+.strow{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:0.5px solid var(--border)}
+.strow:last-of-type{border-bottom:none}
+.strow.curh{background:var(--bg2);border-radius:var(--r);padding:10px;margin:-2px 0}
+.snum{width:26px;height:26px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:1px;color:var(--muted)}
+.snum.done{background:var(--green);color:#fff;border-color:var(--green)}
+.snum.cur{background:var(--green-l);border-color:var(--green);color:var(--green)}
+.slb{font-size:13px;font-weight:500;margin-bottom:3px}
+.sds{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* PRODUCTS */
+.frow{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+.fbt{padding:5px 12px;font-size:12px;border-radius:20px;border:0.5px solid var(--border);background:#fff;cursor:pointer;color:var(--muted);transition:all .15s}
+.fbt:hover{border-color:var(--green);color:var(--green)}
+.fbt.on{background:var(--green);color:#fff;border-color:var(--green)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:9px}
+.pc{background:#fff;border:0.5px solid var(--border);border-radius:var(--rl);padding:12px;cursor:pointer;transition:border-color .15s}
+.pc:hover{border-color:var(--green)}
+.pc.sel{border-color:var(--green);background:var(--green-l);border-width:1.5px}
+.rbadge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:5px}
+.rh{background:var(--green-l);color:#085041}.rm{background:#fef3c7;color:#92400e}
+.pname{font-size:13px;font-weight:500;margin-bottom:3px}
+.pmeta{font-size:11px;color:var(--muted);line-height:1.5}
+.pprofit{font-size:13px;font-weight:500;color:var(--green);margin-top:5px}
+
+/* ACADEMY */
+.llist{display:flex;flex-direction:column;gap:5px}
+.lrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;border:0.5px solid var(--border);background:#fff;transition:border-color .15s}
+.lrow:hover{border-color:var(--green)}
+.lrow.done{opacity:.75}
+.lico{width:34px;height:34px;border-radius:8px;flex-shrink:0;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:15px}
+.lrow.done .lico{background:var(--green-l)}
+.ltit{font-size:13px;font-weight:500}
+.ltit.stk{text-decoration:line-through;color:var(--muted)}
+.lmeta{font-size:11px;color:var(--muted);margin-top:1px}
+.lbdg{font-size:10px;padding:2px 8px;border-radius:10px;flex-shrink:0;margin-left:auto}
+.lbf{background:var(--green-l);color:#085041}.lbp{background:#ede9fe;color:#4c1d95}.lbd{background:var(--bg3);color:var(--muted)}
+.llwrap.hidden{display:none}
+
+/* PLAYER */
+.plview{display:none;flex-direction:column}
+.plview.open{display:flex}
+.pltop{display:flex;align-items:center;gap:10px;padding:11px 14px;border:0.5px solid var(--border);border-radius:var(--rl) var(--rl) 0 0;background:#fff}
+.backbtn{display:flex;align-items:center;gap:5px;padding:5px 10px;font-size:12px;border-radius:var(--r);cursor:pointer;border:0.5px solid var(--border);background:#fff;color:var(--muted)}
+.backbtn:hover{border-color:var(--green);color:var(--green)}
+.pltit{font-size:14px;font-weight:600;flex:1}
+.plsub{font-size:11px;color:var(--muted)}
+.plbody{display:grid;grid-template-columns:1fr 1fr;border:0.5px solid var(--border);border-top:none;border-bottom:none}
+.vcol{background:#0a0a0a;border-right:0.5px solid var(--border);display:flex;flex-direction:column}
+.ytwrap{position:relative;width:100%;aspect-ratio:16/9;background:#111;overflow:hidden}
+.ytwrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.ytthumb{width:100%;height:100%;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.ytthumb:hover .pring{background:rgba(255,255,255,.2)}
+.pring{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;transition:background .15s}
+.ptri{width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:18px solid #fff;margin-left:4px}
+.ytlbl{font-size:11px;color:rgba(255,255,255,.4);text-align:center;padding:0 12px;line-height:1.4}
+.ytclick{font-size:10px;color:rgba(255,255,255,.25)}
+.vnote{padding:7px;font-size:10px;color:rgba(255,255,255,.25);text-align:center}
+.acol{padding:14px;overflow-y:auto;max-height:340px;background:#fff}
+.aldr{display:flex;align-items:center;gap:6px;padding:4px 0;color:var(--muted);font-size:12px}
+.lbody{font-size:13px;line-height:1.65;color:var(--text)}
+.lbody p{margin-bottom:9px}
+.lbody p:last-child{margin-bottom:0}
+.hwbox{margin-top:12px;padding:11px 13px;background:var(--green-l);border-radius:var(--r);font-size:12px;color:#085041;line-height:1.55}
+.hwlbl{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;color:var(--green-d)}
+.erbox{background:var(--bg2);border-radius:var(--r);padding:13px;font-size:13px;line-height:1.65}
+.plfoot{display:flex;gap:8px;align-items:center;padding:10px 14px;border:0.5px solid var(--border);border-top:none;border-radius:0 0 var(--rl) var(--rl);background:#fff}
+.fnote{font-size:11px;color:var(--muted);margin-left:auto}
+
+/* ADVISOR */
+.chat{background:var(--bg2);border-radius:var(--rl);border:0.5px solid var(--border);min-height:240px;max-height:340px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.msg{display:flex;gap:7px;align-items:flex-start}
+.msg.u{flex-direction:row-reverse}
+.mav{width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.msg.u .mav{background:#dbeafe;color:#1e40af}
+.mbub{background:#fff;border:0.5px solid var(--border);border-radius:var(--rl);padding:8px 12px;font-size:13px;line-height:1.55;max-width:88%}
+.msg.u .mbub{background:var(--green-l);border-color:var(--green-m)}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0}
+.chip{padding:5px 11px;font-size:12px;border-radius:20px;border:0.5px solid var(--border);background:#fff;cursor:pointer;color:var(--muted);transition:all .15s}
+.chip:hover{border-color:var(--green);color:var(--green);background:var(--green-l)}
+
+@media(max-width:640px){
+  .plbody{grid-template-columns:1fr}
+  .vcol{border-right:none;border-bottom:0.5px solid var(--border)}
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="header">
+  <div class="logo">5R</div>
+  <div>
+    <div class="app-name">Shopify Launch Assistant</div>
+    <div class="app-sub">5R2Shopify Dominance · Setup · Products · Academy · AI Advisor</div>
+  </div>
+</div>
+<div class="nav">
+  <button class="ntab on" onclick="sw('setup')">Setup wizard</button>
+  <button class="ntab" onclick="sw('products')">Product research</button>
+  <button class="ntab" onclick="sw('academy')">Academy</button>
+  <button class="ntab" onclick="sw('advisor')">AI advisor</button>
+</div>
+
+<!-- SETUP -->
+<div id="t-setup" class="tab on">
+  <span class="cbadge">5R TradeSuite integration ready</span>
+  <div class="ssegs" id="ssegs"></div>
+  <div class="slbl">Store setup checklist</div>
+  <div id="slist"></div>
+  <div class="irow" style="margin-top:13px">
+    <button class="bg" onclick="askStep()">Ask AI about this step ↗</button>
+    <button class="bo" onclick="markStep()">Mark done</button>
+  </div>
+  <div id="saout"></div>
+</div>
+
+<!-- PRODUCTS -->
+<div id="t-products" class="tab">
+  <div class="srow" id="pstats"></div>
+  <div class="frow" id="pfilts"></div>
+  <div class="slbl">High-ROI products for your niche</div>
+  <div class="pgrid" id="pgrid"></div>
+  <div class="irow">
+    <input class="inp" id="pinp" placeholder="Describe your niche or ask for product ideas…"/>
+    <button class="bg" onclick="searchP()">Find products ↗</button>
+  </div>
+  <div id="paout"></div>
+</div>
+
+<!-- ACADEMY -->
+<div id="t-academy" class="tab">
+  <div class="srow">
+    <div class="sc"><div class="sl">Lessons</div><div class="sv">12</div></div>
+    <div class="sc"><div class="sl">Completed</div><div class="sv" id="acdone">0</div></div>
+    <div class="sc"><div class="sl">Progress</div><div class="sv" id="acpct">0%</div></div>
+  </div>
+  <div class="pb"><div class="pf" id="acprog" style="width:0%"></div></div>
+  <div id="llwrap">
+    <div class="slbl">Learning path — click any lesson to open it</div>
+    <div class="llist" id="llist"></div>
+  </div>
+  <div id="plview" class="plview">
+    <div class="pltop">
+      <button class="backbtn" onclick="closePl()">← All lessons</button>
+      <div style="flex:1">
+        <div class="pltit" id="pltit"></div>
+        <div class="plsub" id="plsub"></div>
+      </div>
+      <span class="fnote" id="plnum"></span>
+    </div>
+    <div class="plbody">
+      <div class="vcol">
+        <div class="ytwrap" id="ytwrap"></div>
+        <div class="vnote">YouTube tutorial · click to play</div>
+      </div>
+      <div class="acol" id="acol">
+        <div class="aldr"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:5px">Generating lesson…</span></div>
+      </div>
+    </div>
+    <div class="plfoot">
+      <button class="bg" id="mkbtn" onclick="markL()" style="font-size:12px;padding:8px 15px">Mark complete</button>
+      <button class="bo" onclick="nextL()" style="font-size:12px;padding:8px 12px">Next lesson →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADVISOR -->
+<div id="t-advisor" class="tab">
+  <div class="slbl">AI advisor — ask anything about Shopify</div>
+  <div class="chat" id="chat"></div>
+  <div class="chips" id="achips"></div>
+  <div class="irow">
+    <input class="inp" id="ainp" placeholder="e.g. What products should I launch first?" onkeydown="if(event.key==='Enter')sendA()"/>
+    <button class="bg" id="abtn" onclick="sendA()">Send</button>
+  </div>
+</div>
+</div>
+
+<script>
+const API = '/api/claude';
+
+async function claude(system, messages, max_tokens) {
+  max_tokens = max_tokens || 900;
+  const r = await fetch(API, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({system, messages, max_tokens})
+  });
+  if (!r.ok) throw new Error('API ' + r.status);
+  return r.json();
+}
+
+// TAB
+function sw(n) {
+  ['setup','products','academy','advisor'].forEach(function(t,i) {
+    document.getElementById('t-'+t).classList.toggle('on', t===n);
+    document.querySelectorAll('.ntab')[i].classList.toggle('on', t===n);
+  });
+}
+
+// SETUP DATA
+var STEPS = [
+  {l:'Create Shopify account',d:'Start a free trial at shopify.com. Choose Basic plan to minimize cost while testing.',done:false},
+  {l:'Choose & customize a theme',d:'Use Dawn (free) for fast load times. Match your brand colors and upload your logo.',done:false},
+  {l:'Configure store settings',d:'Set store name, USD currency, time zone, and enable taxes for your state.',done:false},
+  {l:'Add your domain',d:'Connect 5rtradesuite.com subdomain or buy a .store domain (~$1/yr intro price).',done:false},
+  {l:'Set up payment gateway',d:'Enable Shopify Payments + PayPal. Fewer fees than Stripe for new stores.',done:false},
+  {l:'Configure shipping zones',d:'Free shipping over $35 boosts AOV. Add flat-rate $4.99 under that threshold.',done:false},
+  {l:'Install core apps',d:'DSers (dropship), Klaviyo (email), TrustPulse (social proof), ReConvert (upsells).',done:false},
+  {l:'Add 10-15 hero products',d:'Focus on 3-5 winning SKUs first. Use the Product Research tab for high-ROI picks.',done:false},
+  {l:'Set up collections & nav',d:'3-4 collections max. Keep nav simple: Home, Shop, About, Contact.',done:false},
+  {l:'Connect 5R AI agent',d:'Use your API credentials to link SmartBuild or the relevant trade AI agent to your store.',done:false},
+  {l:'Launch & drive first traffic',d:'Post 3 TikTok/Instagram Reels before launch day. Pin store link in bio.',done:false}
+];
+var si = 0;
+
+function renderS() {
+  document.getElementById('ssegs').innerHTML = STEPS.map(function(_,i) {
+    return '<div class="seg '+(STEPS[i].done?'done':i===si?'cur':'')+'"></div>';
+  }).join('');
+  document.getElementById('slist').innerHTML = STEPS.map(function(s,i) {
+    return '<div class="strow'+(i===si?' curh':'')+'"><div class="snum '+(s.done?'done':i===si?'cur':'')+'">'+(s.done?'✓':i+1)+'</div><div><div class="slb"'+(s.done?' style="text-decoration:line-through;color:#9ca3af"':'')+'>'+s.l+'</div><div class="sds">'+s.d+'</div></div></div>';
+  }).join('');
+}
+
+function markStep() { STEPS[si].done=true; if(si<STEPS.length-1)si++; renderS(); }
+
+async function askStep() {
+  var s=STEPS[si], out=document.getElementById('saout');
+  out.innerHTML='<div class="aout"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+  try {
+    var d=await claude('Shopify setup expert for 5R TradeSuite helping trades business owners. Specific, practical, under 120 words.',[{role:'user',content:'Expert advice on: "'+s.l+'". Context: '+s.d}]);
+    out.innerHTML='<div class="aout">'+(d.content[0].text||'').replace(/\n/g,'<br>')+'</div>';
+  } catch(e) { out.innerHTML='<div class="aout" style="color:#dc2626">Connection error — try again.</div>'; }
+}
+
+// PRODUCTS
+var PRODS = [
+  {n:'LED shop light (4ft)',ni:'Trade tools',c:8.5,s:32,m:73,t:'high',cat:'tools'},
+  {n:'Wire connector kit (100pc)',ni:'Electrical',c:3.2,s:18,m:82,t:'high',cat:'tools'},
+  {n:'Hummingbird feeder (glass)',ni:'Home & garden',c:4.1,s:22,m:81,t:'high',cat:'garden'},
+  {n:'Pipe thread tape (5-pack)',ni:'Plumbing',c:1.8,s:11,m:84,t:'med',cat:'tools'},
+  {n:'Roofing nail gun bits set',ni:'Roofing',c:6.5,s:28,m:77,t:'high',cat:'tools'},
+  {n:'Smart outlet plug (2-pack)',ni:'Smart home',c:5.2,s:24,m:78,t:'high',cat:'smart'},
+  {n:'Landscaping edging (50ft)',ni:'Yard / lawn',c:7.0,s:29,m:76,t:'med',cat:'garden'},
+  {n:'Voltage tester pen',ni:'Electrical',c:2.5,s:15,m:83,t:'high',cat:'tools'},
+  {n:'Magnetic wristband tool holder',ni:'Trade tools',c:3.8,s:19,m:80,t:'high',cat:'tools'},
+  {n:'Bird watching journal (POD)',ni:'Pet / hobby',c:4.5,s:16,m:72,t:'med',cat:'pod'},
+  {n:"Plumber's putty 2-pack",ni:'Plumbing',c:2.1,s:12,m:83,t:'med',cat:'tools'},
+  {n:'Solar path lights (8-pack)',ni:'Garden',c:9.0,s:36,m:75,t:'high',cat:'garden'}
+];
+var pf = 'all';
+
+function getPL() { return pf==='all'?PRODS:PRODS.filter(function(p){return p.cat===pf||(pf==='high'&&p.t==='high');}); }
+
+function renderPS() {
+  var avg=Math.round(PRODS.reduce(function(s,p){return s+p.m;},0)/PRODS.length);
+  var top=Math.max.apply(null,PRODS.map(function(p){return p.m;}));
+  var fl=getPL();
+  document.getElementById('pstats').innerHTML='<div class="sc"><div class="sl">Showing</div><div class="sv">'+fl.length+'</div></div><div class="sc"><div class="sl">Avg margin</div><div class="sv">'+avg+'%</div></div><div class="sc"><div class="sl">Top margin</div><div class="sv">'+top+'%</div></div>';
+}
+
+function renderPF() {
+  var cats=[['all','All'],['high','Trending'],['tools','Tools'],['garden','Garden'],['smart','Smart home'],['pod','Print-on-demand']];
+  document.getElementById('pfilts').innerHTML=cats.map(function(c){return '<button class="fbt '+(pf===c[0]?'on':'')+'" onclick="setF(\''+c[0]+'\')">'+c[1]+'</button>';}).join('');
+}
+
+function renderPG() {
+  document.getElementById('pgrid').innerHTML=getPL().map(function(p){
+    return '<div class="pc" onclick="pickP(this,\''+p.n.replace(/'/g,"\\'")+'\')">'
+      +'<span class="rbadge '+(p.t==='high'?'rh':'rm')+'">'+p.m+'% margin</span>'
+      +'<div class="pname">'+p.n+'</div>'
+      +'<div class="pmeta">'+p.ni+'<br>Cost $'+p.c.toFixed(2)+' → Sell $'+p.s+'</div>'
+      +'<div class="pprofit">~$'+(p.s-p.c).toFixed(2)+' profit/unit</div></div>';
+  }).join('');
+}
+
+function setF(f) { pf=f; renderPF(); renderPG(); renderPS(); }
+
+async function pickP(el,name) {
+  document.querySelectorAll('.pc').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+  var out=document.getElementById('paout');
+  out.innerHTML='<div class="aout"><span class="dot"></span><span class="dot"></span><span class="dot"></span> Tips for <strong>'+name+'</strong>…</div>';
+  try {
+    var d=await claude('Shopify dropshipping expert. Brief sourcing tip and listing advice. Under 90 words, plain text.',[{role:'user',content:'Sourcing tip and listing advice for "'+name+'" targeting trade workers and DIYers.'}],600);
+    out.innerHTML='<div class="aout">'+(d.content[0].text||'').replace(/\n/g,'<br>')+'</div>';
+  } catch(e) { out.innerHTML=''; }
+}
+
+async function searchP() {
+  var q=document.getElementById('pinp').value.trim();
+  if(!q)return;
+  var out=document.getElementById('paout');
+  out.innerHTML='<div class="aout"><span class="dot"></span><span class="dot"></span><span class="dot"></span> Searching…</div>';
+  try {
+    var d=await claude('Shopify product research expert. Suggest 5 high-margin dropshippable products with cost, sell price, and why. Concise, no markdown.',[{role:'user',content:q}]);
+    out.innerHTML='<div class="aout">'+(d.content[0].text||'').replace(/\n/g,'<br>')+'</div>';
+  } catch(e) { out.innerHTML='<div class="aout" style="color:#dc2626">Error — try again.</div>'; }
+}
+
+// ACADEMY
+var LESSONS = [
+  {ic:'🏗',tt:'Store setup basics',sb:'Themes, settings, domain',dr:'18 min',fr:true,yt:'ljJ3OHZ5Z2U',yl:'Full Shopify Store Setup – Santrel Media'},
+  {ic:'📦',tt:'Product sourcing 101',sb:'AliExpress, AutoDS, Zendrop',dr:'22 min',fr:true,yt:'Pz6vmVv6YOg',yl:'Product Sourcing & Dropshipping – Learn With Shopify'},
+  {ic:'💵',tt:'Pricing for profit',sb:'Markup math, perceived value',dr:'15 min',fr:true,yt:'5CLqT-Qn5fo',yl:'Shopify Pricing Strategy for Beginners'},
+  {ic:'🚢',tt:'Fulfillment & shipping',sb:'DSers, print-on-demand, 3PL',dr:'20 min',fr:false,yt:'UO2AzfkRbrM',yl:'Shopify Fulfillment & Shipping Setup'},
+  {ic:'📣',tt:'TikTok organic traffic',sb:'Hook formula, posting schedule',dr:'25 min',fr:false,yt:'T2tagxLhlv4',yl:'TikTok Marketing for Shopify Stores'},
+  {ic:'📧',tt:'Email automation',sb:'Klaviyo flows, abandoned cart',dr:'20 min',fr:false,yt:'fHYkv6tiLY0',yl:'Klaviyo Email Flows for Shopify'},
+  {ic:'⭐',tt:'Reviews & social proof',sb:'Judge.me, TrustPulse setup',dr:'14 min',fr:true,yt:'6Da36Z9gNuU',yl:'Shopify Reviews & Trust Signals'},
+  {ic:'🔁',tt:'Upsells & bundles',sb:'AOV boosting with ReConvert',dr:'18 min',fr:false,yt:'vo6aDcnPzCUA',yl:'Shopify Upsell & Bundle Apps'},
+  {ic:'📊',tt:'Shopify analytics',sb:'Reading dashboards, key KPIs',dr:'16 min',fr:false,yt:'ljJ3OHZ5Z2U',yl:'Understanding Shopify Analytics & Reports'},
+  {ic:'🤖',tt:'AI agent integration',sb:'Connect 5R bots to your store',dr:'30 min',fr:false,yt:'Pz6vmVv6YOg',yl:'AI Automation for Shopify – Setup Guide'},
+  {ic:'💰',tt:'First $1k roadmap',sb:'30-day launch sprint plan',dr:'20 min',fr:false,yt:'5CLqT-Qn5fo',yl:'How to Make Your First $1000 on Shopify'},
+  {ic:'📈',tt:'Scale to $10k/mo',sb:'Paid ads, influencers, bundles',dr:'28 min',fr:false,yt:'UO2AzfkRbrM',yl:'Scaling Your Shopify Store to $10k/Month'}
+];
+var LDone=new Array(12).fill(false), aIdx=null;
+
+var FB=[
+  'Start with Shopify\'s free Dawn theme — it loads fast and converts well. Set your store name, currency to USD, and timezone first. Connect a custom domain early so your brand looks professional. Your task: Complete all settings under Store Settings before adding a single product.',
+  'Use DSers or AutoDS to source from AliExpress. Filter suppliers by 4-star+ rating and ePacket shipping. For US delivery try Zendrop or Spocket. Your task: Source 5 products from AliExpress using DSers and import them to your store.',
+  'The golden formula: Cost x 3 = retail price. A $5 product should sell for $15+. Bundle items to increase AOV. Your task: Price all your products using the 3x rule and identify two you can bundle.',
+  'Install DSers for AliExpress fulfillment. For print-on-demand, Printful or Printify connect directly to Shopify. Always show delivery estimates on product pages. Your task: Set up your first shipping profile and connect one fulfillment app.',
+  'TikTok organic works because the algorithm pushes new accounts. Post daily using this hook formula: Problem, Agitate, Solve. Show the product in use in the first 2 seconds. Your task: Film 3 TikTok videos showing your top product being used.',
+  'Install Klaviyo free up to 500 contacts. Build these three flows first: Welcome Series, Abandoned Cart, Post-Purchase. Your task: Set up an abandoned cart flow targeting 1 hour after abandonment.',
+  'Install Judge.me free plan for product reviews. Email customers 7 days after delivery asking for a review. Add TrustPulse for live social proof popups. Your task: Install Judge.me and set up an automated post-purchase review request.',
+  'Install ReConvert to add post-purchase upsell pages. The best upsell is a complementary product at 30-50% of the original price. Your task: Create one post-purchase upsell offer using ReConvert targeting your best-selling product.',
+  'Track these KPIs weekly: Sessions, Conversion Rate (aim 2%+), AOV, and Revenue. Use the Reports section to see which products and traffic sources perform best. Your task: Write down your current conversion rate and top traffic source.',
+  'Go to Shopify Admin, Apps, App development. Create a new app, set the required API scopes, copy the Admin API token. Paste it into your 5R agent settings. Your task: Generate your Shopify Admin API token and connect it to your 5R AI agent.',
+  'Your 30-day roadmap: Days 1-7 launch store and post daily on TikTok. Days 8-14 run $5/day TikTok ads. Days 15-21 email your list with 15% off. Days 22-30 add 5 more products. Your task: Write out your personal 30-day calendar with one revenue action per day.',
+  'Scaling to $10k/month requires three levers: more traffic, better conversion, higher AOV. Add paid TikTok ads $20-50/day on proven organic content. Your task: Identify your best-converting product and outline a paid ad strategy for it.'
+];
+
+function updAC() {
+  var n=LDone.filter(Boolean).length;
+  document.getElementById('acdone').textContent=n;
+  var p=Math.round(n/12*100);
+  document.getElementById('acpct').textContent=p+'%';
+  document.getElementById('acprog').style.width=p+'%';
+}
+
+function renderLL() {
+  document.getElementById('llist').innerHTML=LESSONS.map(function(l,i){
+    return '<div class="lrow'+(LDone[i]?' done':'')+'" onclick="openL('+i+')">'
+      +'<div class="lico">'+(LDone[i]?'✓':l.ic)+'</div>'
+      +'<div style="flex:1;min-width:0"><div class="ltit'+(LDone[i]?' stk':'')+'">'+l.tt+'</div><div class="lmeta">'+l.sb+' · '+l.dr+'</div></div>'
+      +'<span class="lbdg '+(LDone[i]?'lbd':l.fr?'lbf':'lbp')+'">'+(LDone[i]?'Done':l.fr?'Free':'Pro')+'</span>'
+      +'</div>';
+  }).join('');
+}
+
+function openL(idx) {
+  aIdx=idx;
+  var l=LESSONS[idx];
+  document.getElementById('llwrap').classList.add('hidden');
+  document.getElementById('plview').classList.add('open');
+  document.getElementById('pltit').textContent=l.tt;
+  document.getElementById('plsub').textContent=l.sb+' · '+l.dr;
+  document.getElementById('plnum').textContent=(idx+1)+' of 12';
+  document.getElementById('ytwrap').innerHTML='<div class="ytthumb" onclick="loadVid()">'
+    +'<div class="pring"><div class="ptri"></div></div>'
+    +'<div class="ytlbl">'+l.yl+'</div>'
+    +'<div class="ytclick">Click to play</div>'
+    +'</div>';
+  var mb=document.getElementById('mkbtn');
+  mb.textContent=LDone[idx]?'Completed':'Mark complete';
+  mb.disabled=LDone[idx];
+  loadAIL(idx);
+}
+
+function closePl() {
+  document.getElementById('plview').classList.remove('open');
+  document.getElementById('llwrap').classList.remove('hidden');
+  document.getElementById('ytwrap').innerHTML='';
+  aIdx=null;
+}
+
+function loadVid() {
+  if(aIdx===null)return;
+  var yt=LESSONS[aIdx].yt;
+  document.getElementById('ytwrap').innerHTML='<iframe src="https://www.youtube.com/embed/'+yt+'?autoplay=1&rel=0&modestbranding=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+}
+
+async function loadAIL(idx) {
+  var l=LESSONS[idx], col=document.getElementById('acol');
+  if(!col)return;
+  col.innerHTML='<div class="aldr"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:5px">Generating lesson…</span></div>';
+  try {
+    var d=await claude('Shopify mentor for 5R TradeSuite. Write a punchy 120-word lesson in 2-3 short paragraphs. End with one task starting with "Your task:". Plain prose, no markdown.',[{role:'user',content:'Lesson: "'+l.tt+'" ('+l.sb+'). Audience: trades business owners launching their first Shopify dropship store.'}]);
+    if(!d.content||!d.content[0]||!d.content[0].text)throw new Error('empty');
+    var txt=d.content[0].text;
+    var pts=txt.split(/(Your task:.*)/s);
+    var body=pts[0].trim();
+    var hw=(pts[1]||'').trim();
+    col.innerHTML='<div class="lbody">'+body.split(/\n\n+/).filter(function(p){return p.trim();}).map(function(p){return '<p>'+p.trim()+'</p>';}).join('')+'</div>'
+      +(hw?'<div class="hwbox"><div class="hwlbl">Your homework</div>'+hw.replace(/^Your task:\s*/i,'').trim()+'</div>':'');
+  } catch(e) {
+    var fb=FB[idx]||'Lesson temporarily unavailable — use the video on the left.';
+    var pts=fb.split('Your task:');
+    col.innerHTML='<div class="erbox"><div class="lbody"><p>'+pts[0].trim()+'</p></div>'+(pts[1]?'<div class="hwbox"><div class="hwlbl">Your homework</div>'+pts[1].trim()+'</div>':'')+'</div>';
+  }
+}
+
+function markL() {
+  if(aIdx===null)return;
+  LDone[aIdx]=true;
+  var mb=document.getElementById('mkbtn');
+  if(mb){mb.textContent='Completed';mb.disabled=true;}
+  updAC(); renderLL();
+  if(aIdx<11)setTimeout(function(){openL(aIdx+1);},400);
+}
+
+function nextL() { if(aIdx!==null)openL(Math.min(aIdx+1,11)); }
+
+// ADVISOR
+var CHIPS=['Fastest way to make my first sale?','How do I find winning products?','Must-have Shopify apps?','How do I set up email flows?','How do I connect my 5R AI agent?','Good profit margin for dropshipping?'];
+var AH=[];
+
+function renderChips() {
+  document.getElementById('achips').innerHTML=CHIPS.map(function(c){
+    return '<div class="chip" onclick="fillA(\''+c.replace(/'/g,"\\'")+'\')"> '+c+'</div>';
+  }).join('');
+}
+
+function fillA(t){document.getElementById('ainp').value=t;sendA();}
+
+function appMsg(role,text) {
+  var chat=document.getElementById('chat');
+  var isU=role==='user';
+  var d=document.createElement('div');
+  d.className='msg'+(isU?' u':'');
+  d.innerHTML='<div class="mav">'+(isU?'You':'AI')+'</div><div class="mbub">'+text.replace(/\n/g,'<br>')+'</div>';
+  chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight;
+  return d;
+}
+
+async function sendA() {
+  var inp=document.getElementById('ainp'), btn=document.getElementById('abtn');
+  var txt=inp.value.trim();
+  if(!txt)return;
+  inp.value=''; btn.disabled=true;
+  appMsg('user',txt);
+  AH.push({role:'user',content:txt});
+  var td=appMsg('assistant','<span class="dot"></span><span class="dot"></span><span class="dot"></span>');
+  try {
+    var d=await claude('You are the 5R TradeSuite Shopify AI advisor. Expert in helping trades business owners (electricians, plumbers, roofers, landscapers) set up profitable Shopify stores fast. Direct, specific, action-focused. 100-150 words max.',AH);
+    var reply=d.content[0].text||"Sorry, couldn't get a response.";
+    td.querySelector('.mbub').innerHTML=reply.replace(/\n/g,'<br>');
+    AH.push({role:'assistant',content:reply});
+  } catch(e) { td.querySelector('.mbub').innerHTML='Connection error — please try again.'; }
+  btn.disabled=false;
+  document.getElementById('chat').scrollTop=9999;
+}
+
+// INIT
+renderS();
+renderPS(); renderPF(); renderPG();
+renderLL(); updAC();
+renderChips();
+appMsg('assistant','Hi! I\'m your 5R Shopify advisor. I can help you set up your store, find high-margin products, and turn a profit fast. What\'s your biggest question?');
+</script>
+</body>
+</html>

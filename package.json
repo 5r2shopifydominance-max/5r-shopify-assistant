@@ -1,0 +1,5 @@
+{
+  "name": "5r-shopify-launch-assistant",
+  "version": "1.0.0",
+  "engines": { "node": "24.x" }
+}
